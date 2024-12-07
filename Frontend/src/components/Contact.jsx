@@ -9,32 +9,40 @@ const Contact = () => {
   const [message, setMessage] = useState("");
 
   const handleSendMessage = async (e) => {
-    e.preventDefault();
-    await axios
-      .post(
-        "https://eve-mern-stack-backend.onrender.com/api/v1/message/send",
-        {
+  e.preventDefault();
+  try {
+    const response = await fetch(
+      "https://eve-mern-stack-backend.onrender.com/api/v1/message/send",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           name,
           email,
           subject,
           message,
-        },
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        }
-      )
-      .then((res) => {
-        toast.success(res.data.message);
-        setName("");
-        setEmail("");
-        setMessage("");
-        setSubject("");
-      })
-      .catch((error) => {
-        toast.error(error.response.data.message);
-      });
-  };
+        }),
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      toast.success(data.message);
+      setName("");
+      setEmail("");
+      setMessage("");
+      setSubject("");
+    } else {
+      const errorData = await response.json();
+      toast.error(errorData.message || "Something went wrong!");
+    }
+  } catch (error) {
+    toast.error("Failed to send the message. Please try again.");
+  }
+};
+
 
   return (
     <>
